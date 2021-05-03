@@ -33,7 +33,7 @@ module.exports.likeCard = (req, res) => {
     { $addToSet: { likes: req.user._id } }, // добавить _id в массив, если его там нет
     { new: true }
   ).then(card => { res.send({ data: card }); })
-    .catch(err => handleError(err, res));
+    .catch(err => { if (err.name === 'CastError') { res.status(404).send({ message: err.message }); } else { handleError(err, res); } });
 };
 
 module.exports.dislikeCard = (req, res) => Card.findByIdAndUpdate(
@@ -41,4 +41,4 @@ module.exports.dislikeCard = (req, res) => Card.findByIdAndUpdate(
   { $pull: { likes: req.user._id } }, // убрать _id из массива
   { new: true }
 ).then(card => { res.send({ data: card }); })
-  .catch(err => res.status(500).send({ message: err.message }));
+  .catch(err => { if (err.name === 'CastError') { res.status(404).send({ message: err.message }); } else { handleError(err, res); } });
