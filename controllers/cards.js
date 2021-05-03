@@ -8,8 +8,8 @@ module.exports.getCards = (req, res) => {
 };
 
 module.exports.getCardById = (req, res) => {
-  Card.findById(req.params.id)
-    .then(card => { if (card) { res.send({ data: card }); } else return create404(`Карточка с идентификатором ${req.params.id} не найдена`); })
+  Card.findById(req.params.cardId)
+    .then(card => { if (card) { res.send({ data: card }); } else return create404(`Карточка с идентификатором ${req.params.cardId} не найдена`); })
     .catch(err => handleError(err, res));
 };
 
@@ -18,13 +18,12 @@ module.exports.createCard = (req, res) => {
   const owner = req.user._id;
   Card.create({ name, link, owner })
     .then(card => { res.send({ data: card }); })
-    .catch(err => handleError(err, res));
+    .catch(err => { console.log(err); handleError(err, res); });
 };
 
 module.exports.deleteCard = (req, res) => {
-  const { cardId } = req.body;
-  Card.findOneAndRemove(cardId)
-    .then(card => { if (card) { res.send({ data: card }); } else return create404(`Карточка с идентификатором ${req.params.id} не найдена`); })
+  Card.findOneAndRemove(req.params.cardId)
+    .then(card => { if (card) { res.send({ data: card }); } else return create404(`Карточка с идентификатором ${req.params.cardId} не найдена`); })
     .catch(err => handleError(err, res));
 };
 

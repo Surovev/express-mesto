@@ -8,8 +8,8 @@ module.exports.getUsers = (req, res) => {
 };
 
 module.exports.getUserById = (req, res) => {
-  User.findById(req.user._id)
-    .then(user => { if (user) { res.send({ data: user }); } else return create404(`Карточка с идентификатором ${req.params.id} не найдена`); })
+  User.findById(req.params.userId)
+    .then(user => { if (user) { res.send({ data: user }); } else return create404(`Пользователь с идентификатором ${req.params.userId} не найден`); })
     .catch(err => handleError(err, res));
 };
 
@@ -29,11 +29,10 @@ module.exports.updateUserProfile = (req, res) => {
     // Передадим объект опций:
     {
       new: true, // обработчик then получит на вход обновлённую запись
-      runValidators: true, // данные будут валидированы перед изменением
-      upsert: true // если пользователь не найден, он будет создан
+      runValidators: true // данные будут валидированы перед изменением
     }
   )
-    .then(user => { if (user) { res.send({ data: user }); } else return create404(`Карточка с идентификатором ${req.params.id} не найдена`); })
+    .then(user => { if (user) { res.send({ data: user }); } else return create404(`Пользователь с идентификатором ${req.params.id} не найден`); })
     .catch(err => handleError(err, res));
 };
 
@@ -45,10 +44,9 @@ module.exports.updateUserAvatar = (req, res) => {
     // Передадим объект опций:
     {
       new: true, // обработчик then получит на вход обновлённую запись
-      runValidators: true, // данные будут валидированы перед изменением
-      upsert: true // если пользователь не найден, он будет создан
+      runValidators: true // данные будут валидированы перед изменением
     }
   )
-    .then(user => { if (user) { res.send({ data: user }); } else return create404(`Карточка с идентификатором ${req.params.id} не найдена`); })
+    .then(user => { if (user) { res.send({ data: user }); } else return create404(`Пользователь с идентификатором ${req.params.id} не найден`); })
     .catch(err => handleError(err, res));
 };

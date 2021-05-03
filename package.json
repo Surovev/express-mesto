@@ -6,7 +6,6 @@
   "scripts": {
     "start": "node app.js",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "lint": "npx eslint",
     "dev": "nodemon app.js"
   },
   "repository": {
@@ -14,7 +13,7 @@
     "url": "git+https://github.com/Surovev/express-mesto.git"
   },
   "keywords": [],
-  "author": "",
+  "author": "DS",
   "license": "ISC",
   "bugs": {
     "url": "https://github.com/Surovev/express-mesto/issues"
@@ -28,6 +27,7 @@
     "mongoose": "^5.12.5"
   },
   "devDependencies": {
+    "lint": "npx eslint",
     "nodemon": "^2.0.7"
   }
 }

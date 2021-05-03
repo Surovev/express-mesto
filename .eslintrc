@@ -1,5 +1,0 @@
-{
-  "extends": "airbnb-base",
-  "no-underscore-dangle": "off",
-  "no-param-reassign": "off",
-}

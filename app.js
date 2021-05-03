@@ -25,6 +25,9 @@ mongoose.connect('mongodb://localhost:27017/mestodb', {
 
 app.use('/users', require('./routes/users'));
 app.use('/cards', require('./routes/cards'));
+app.use(function (req, res) {
+  res.status(404).send({ message: 'Ресурс не найден' });
+});
 
 app.listen(PORT, () => {
   // Если всё работает, консоль покажет, какой порт приложение слушает
