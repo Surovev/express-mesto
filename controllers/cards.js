@@ -18,7 +18,7 @@ module.exports.createCard = (req, res) => {
   const owner = req.user._id;
   Card.create({ name, link, owner })
     .then(card => { res.send({ data: card }); })
-    .catch(err => { console.log(err); handleError(err, res); });
+    .catch(err => handleError(err, res));
 };
 
 module.exports.deleteCard = (req, res) => {
