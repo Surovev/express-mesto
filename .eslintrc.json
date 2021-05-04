@@ -1,24 +1,17 @@
 {
-   "allow": ["foo_", "_bar"],
-
-    "no-underscore-dangle": "off",
-    "no-param-reassign": "off",
-
     "env": {
-        "browser": true,
-        "es2021": true
+        "browser": true
     },
     "extends": "airbnb-base",
     "parserOptions": {
         "ecmaFeatures": {
             "jsx": true
         },
-        "ecmaVersion": 12,
+        "ecmaVersion": 2021,
         "sourceType": "module"
     },
-    "plugins": [
-        "react"
-    ],
     "rules": {
+      "no-underscore-dangle": ["error", { "allow": ["_id"] }],
+      "no-param-reassign": "off"
     }
 }

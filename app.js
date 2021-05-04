@@ -11,7 +11,7 @@ app.use(bodyParser.urlencoded({ extended: true }));
 
 app.use((req, res, next) => {
   req.user = {
-    _id: '60812a30b409d63dac54c0ac' // вставьте сюда _id созданного в предыдущем пункте пользователя
+    _id: '60812a30b409d63dac54c0ac', // вставьте сюда _id созданного в предыдущем пункте пользователя
   };
 
   next();
@@ -20,16 +20,18 @@ app.use((req, res, next) => {
 mongoose.connect('mongodb://localhost:27017/mestodb', {
   useNewUrlParser: true,
   useCreateIndex: true,
-  useFindAndModify: false
+  useFindAndModify: false,
 });
 
 app.use('/users', require('./routes/users'));
+
 app.use('/cards', require('./routes/cards'));
-app.use(function (req, res) {
+
+app.use((req, res) => {
   res.status(404).send({ message: 'Ресурс не найден' });
 });
 
 app.listen(PORT, () => {
   // Если всё работает, консоль покажет, какой порт приложение слушает
-  console.log(`App listening on port ${PORT}`);
+  // console.log(`App listening on port ${PORT}`);
 });
