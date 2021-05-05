@@ -7,17 +7,6 @@ module.exports.getCards = (req, res) => {
     .catch((err) => handleError(err, res));
 };
 
-module.exports.getCardById = (req, res) => {
-  Card.findById(req.params.cardId)
-    .then((card) => {
-      if (card) {
-        res.send({ data: card });
-        return null;
-      }
-      return create404(`Карточка с идентификатором ${req.params.cardId} не найдена`);
-    }).catch((err) => handleError(err, res));
-};
-
 module.exports.createCard = (req, res) => {
   const { name, link } = req.body;
   const owner = req.user._id;
@@ -27,7 +16,7 @@ module.exports.createCard = (req, res) => {
 };
 
 module.exports.deleteCard = (req, res) => {
-  Card.findOneAndRemove(req.params.cardId)
+  Card.findOneAndRemove({ _id: req.params.cardId })
     .then((card) => {
       if (card) {
         res.send({ data: card });
