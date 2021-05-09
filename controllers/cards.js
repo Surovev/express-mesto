@@ -1,6 +1,4 @@
-const card = require('../models/card');
 const Card = require('../models/card');
-const user = require('../models/user');
 const { handleError, create404 } = require('../utils/handleError');
 
 module.exports.getCards = (req, res) => {
@@ -18,18 +16,18 @@ module.exports.createCard = (req, res) => {
 };
 
 module.exports.deleteCard = (req, res) => {
-  if(req.user._id !== card.owner) {
-  Card.findOneAndRemove({ _id: req.params.cardId })
-    .then((card) => {
-      if (card) {
-        res.send({ data: card });
-        return null;
-      }
-      return create404(`Карточка с идентификатором ${req.params.cardId} не найдена`);
-    })
-    .catch((err) => handleError(err, res));
+  if (req.user._id !== Card.owner) {
+    Card.findOneAndRemove({ _id: req.params.cardId })
+      .then((card) => {
+        if (card) {
+          res.send({ data: card });
+          return null;
+        }
+        return create404(`Карточка с идентификатором ${req.params.cardId} не найдена`);
+      })
+      .catch((err) => handleError(err, res));
   } else {
-    return res.status(403).send({message: 'Не достаточно прав'})
+    return res.status(403).send({ message: 'Не достаточно прав' });
   }
 };
 
