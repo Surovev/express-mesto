@@ -18,6 +18,7 @@ exports.login = (req, res) => {
       bcrypt.compare(password, user.password)
         .then((matched) => {
           if (!matched) {
+            console.log('Сломалася');
             return Promise.reject(new Error('Неправильная почта или пароль'));
           }
           const token = jwt.sign({ _id: user._id }, 'some-secret-key');
@@ -28,7 +29,7 @@ exports.login = (req, res) => {
           })
             .send({ _id: user._id });
         })
-        .catch((err) => Promise.reject(err));
+        .catch((err) => handleError(err, res, 'Неправильная почта или пароль'));
     })
     .catch((err) => res.statis(401).send({ message: err.message }));
 };
@@ -72,7 +73,7 @@ module.exports.createUser = (req, res) => {
       name, about, avatar, email, password: hash,
     }))
     .then((user) => res.send({ data: user }))
-    .catch((err) => handleError(err, res));
+    .catch((err) => handleError(err, res, 'Пользователь с таким email уже сужествует'));
 };
 
 module.exports.updateUserProfile = (req, res) => {
