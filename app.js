@@ -2,8 +2,12 @@ const express = require('express');
 const cookieParser = require('cookie-parser');
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
+const {
+  celebrate, Joi, isCelebrateError,
+} = require('celebrate');
 const { login, createUser } = require('./controllers/users');
 const auth = require('./middlewares/auth');
+const NotFoundError = require('./errors/NotFoundError');
 
 const { PORT = 3000 } = process.env;
 
@@ -19,8 +23,18 @@ mongoose.connect('mongodb://localhost:27017/mestodb', {
   useFindAndModify: false,
 });
 
-app.post('/signin', login);
-app.post('/signup', createUser);
+app.post('/signin', celebrate({
+  body: Joi.object().keys({
+    email: Joi.string().email().required(),
+    password: Joi.string().required().min(8),
+  }),
+}), login);
+app.post('/signup', celebrate({
+  body: Joi.object().keys({
+    email: Joi.string().email(),
+    password: Joi.string().required().min(8),
+  }),
+}), createUser);
 
 app.use(auth);
 
@@ -28,8 +42,29 @@ app.use('/users', require('./routes/users'));
 
 app.use('/cards', require('./routes/cards'));
 
-app.use((req, res) => {
-  res.status(404).send({ message: 'Ресурс не найден' });
+app.use(() => {
+  throw new NotFoundError('Страница не найдена');
+});
+
+app.use((err, req, res, next) => {
+  if (isCelebrateError(err)) {
+    const errorBody = err.details.get('body');
+    const { details: [errorDetails] } = errorBody;
+    res
+      .status(400)
+      .send({
+        message: errorDetails.message,
+      });
+  } else {
+    const { statusCode = err.status || 500, message = err.message || 'На сервере произошла ошибка' } = err;
+    res
+      .status(statusCode)
+      .send({
+        // проверяем статус и выставляем сообщение в зависимости от него
+        message,
+      });
+  }
+  next();
 });
 
 app.listen(PORT, () => {

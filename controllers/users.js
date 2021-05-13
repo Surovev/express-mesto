@@ -1,70 +1,68 @@
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const User = require('../models/user');
-const { handleError, create404 } = require('../utils/handleError');
+const NotFoundError = require('../errors/NotFoundError');
+const LoginError = require('../errors/LoginError');
 
 const SOLT_ROUNDS = 10;
 
-exports.login = (req, res) => {
+exports.login = (req, res, next) => {
   const { email, password } = req.body;
   if (!email || !password) {
-    return res.status(400).send({ message: 'Не передан email или пароль' });
+    throw new LoginError('Неправильная почта или пароль');
   }
   User.findOne({ email }).select('+password')
     .then((user) => {
       if (!user) {
-        return Promise.reject(new Error('Неправильная почта или пароль'));
+        throw new LoginError('Неправильная почта или пароль');
       }
       bcrypt.compare(password, user.password)
         .then((matched) => {
           if (!matched) {
-            console.log('Сломалася');
-            return Promise.reject(new Error('Неправильная почта или пароль'));
+            throw new LoginError('Неправильная почта или пароль');
           }
           const token = jwt.sign({ _id: user._id }, 'some-secret-key');
           res.cookie('userToken', token, {
-            maxAge: 3600000 * 7 * 24,
+            maxAge: 360000 * 7 * 24,
             httpOnly: true,
             sameSite: true,
           })
             .send({ _id: user._id });
         })
-        .catch((err) => handleError(err, res, 'Неправильная почта или пароль'));
+        .catch((err) => next(err));
     })
-    .catch((err) => res.statis(401).send({ message: err.message }));
+    .catch((err) => next(err));
 };
 
-module.exports.getUsers = (req, res) => {
+module.exports.getUsers = (req, res, next) => {
   User.find({})
     .then((users) => res.send({ data: users }))
-    .catch((err) => handleError(err, res));
+    .catch((err) => next(err));
 };
 
-module.exports.getUserInfo = (req, res) => {
+module.exports.getUserInfo = (req, res, next) => {
   User.findById(req.user._id)
     .then((user) => {
-      if (user) {
-        res.send({ data: user });
-        return null;
+      if (!user) {
+        throw new NotFoundError('Нет пользователя с таким id');
       }
-      return create404(`Пользователь с идентификатором ${req.params.id} не найден`);
+      res.send({ data: user });
     })
-    .catch((err) => handleError(err, res));
+    .catch((err) => next(err));
 };
 
-module.exports.getUserById = (req, res) => {
+module.exports.getUserById = (req, res, next) => {
   User.findById(req.params.userId)
     .then((user) => {
-      if (user) {
-        res.send({ data: user });
-        return null;
+      if (!user) {
+        throw new NotFoundError('Нет пользователя с таким id');
       }
-      return create404(`Пользователь с идентификатором ${req.params.id} не найден`);
+      res.send({ data: user });
     })
-    .catch((err) => handleError(err, res));
+    .catch((err) => next(err));
 };
 
-module.exports.createUser = (req, res) => {
+module.exports.createUser = (req, res, next) => {
   const {
     name, about, avatar, email,
   } = req.body;
@@ -72,11 +70,21 @@ module.exports.createUser = (req, res) => {
     .then((hash) => User.create({
       name, about, avatar, email, password: hash,
     }))
-    .then((user) => res.send({ data: user }))
-    .catch((err) => handleError(err, res, 'Пользователь с таким email уже сужествует'));
+    .then((user) => {
+      if (!user) {
+        throw new NotFoundError('Нет пользователя с таким id');
+      }
+      res.send({ data: user });
+    })
+    .catch((err) => {
+      if (err.name === 'MongoError') {
+        res.status(409).send({ message: 'Пользователь с таким Email уже существует' });
+      }
+      next(err);
+    });
 };
 
-module.exports.updateUserProfile = (req, res) => {
+module.exports.updateUserProfile = (req, res, next) => {
   const { name, about } = req.body;
   User.findByIdAndUpdate(
     req.user._id,
@@ -88,16 +96,15 @@ module.exports.updateUserProfile = (req, res) => {
     },
   )
     .then((user) => {
-      if (user) {
-        res.send({ data: user });
-        return null;
+      if (!user) {
+        throw new NotFoundError('Нет пользователя с таким id');
       }
-      return create404(`Пользователь с идентификатором ${req.params.id} не найден`);
+      res.send({ data: user });
     })
-    .catch((err) => handleError(err, res));
+    .catch((err) => next(err));
 };
 
-module.exports.updateUserAvatar = (req, res) => {
+module.exports.updateUserAvatar = (req, res, next) => {
   const { avatar } = req.body;
   User.findByIdAndUpdate(
     req.user._id,
@@ -109,11 +116,10 @@ module.exports.updateUserAvatar = (req, res) => {
     },
   )
     .then((user) => {
-      if (user) {
-        res.send({ data: user });
-        return null;
+      if (!user) {
+        throw new NotFoundError('Нет пользователя с таким id');
       }
-      return create404(`Пользователь с идентификатором ${req.params.id} не найден`);
+      res.send({ data: user });
     })
-    .catch((err) => handleError(err, res));
+    .catch((err) => next(err));
 };
