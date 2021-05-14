@@ -3,6 +3,7 @@ const jwt = require('jsonwebtoken');
 const User = require('../models/user');
 const NotFoundError = require('../errors/NotFoundError');
 const LoginError = require('../errors/LoginError');
+const ConflictError = require('../errors/ConflictError');
 
 const SOLT_ROUNDS = 10;
 
@@ -74,13 +75,20 @@ module.exports.createUser = (req, res, next) => {
       if (!user) {
         throw new NotFoundError('Нет пользователя с таким id');
       }
-      res.send({ data: user });
+      res.send({
+        name: user.name,
+        about: user.about,
+        avatar: user.avatar,
+        _id: user._id,
+        email: user.email,
+      });
     })
     .catch((err) => {
       if (err.name === 'MongoError') {
-        res.status(409).send({ message: 'Пользователь с таким Email уже существует' });
+        next(new ConflictError('Пользователь с таким email уже существует'));
+      } else {
+        next(err);
       }
-      next(err);
     });
 };
 

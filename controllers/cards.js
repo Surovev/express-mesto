@@ -19,18 +19,15 @@ module.exports.createCard = (req, res, next) => {
     })
     .catch((err) => next(err));
 };
-
 module.exports.deleteCard = (req, res, next) => {
-  if (req.user._id !== Card.owner) { // оба этих параметра строки, и все работает
-    Card.findOneAndRemove({ _id: req.params.cardId })
-      .then((card) => {
-        if (!card) {
-          throw new NotFoundError('Нет карточки с таким id');
-        }
-        res.send({ data: card });
-      })
-      .catch((err) => next(err));
-  }
+  Card.findOneAndRemove({ _id: req.params.cardId, owner: req.user._id })
+    .then((card) => {
+      if (!card) {
+        throw new NotFoundError('Нет карточки с таким id');
+      }
+      res.send({ data: card });
+    })
+    .catch((err) => next(err));
 };
 
 module.exports.likeCard = (req, res, next) => {
