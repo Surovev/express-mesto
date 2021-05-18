@@ -5,6 +5,7 @@ const bodyParser = require('body-parser');
 const {
   celebrate, Joi, isCelebrateError,
 } = require('celebrate');
+const { requestLogger, errorLogger } = require('./middlewares/Logger');
 const { login, createUser } = require('./controllers/users');
 const auth = require('./middlewares/auth');
 const NotFoundError = require('./errors/NotFoundError');
@@ -22,6 +23,8 @@ mongoose.connect('mongodb://localhost:27017/mestodb', {
   useCreateIndex: true,
   useFindAndModify: false,
 });
+
+app.use(requestLogger);
 
 app.post('/signin', celebrate({
   body: Joi.object().keys({
@@ -41,6 +44,8 @@ app.use(auth);
 app.use('/users', require('./routes/users'));
 
 app.use('/cards', require('./routes/cards'));
+
+app.use(errorLogger);
 
 app.use(() => {
   throw new NotFoundError('Страница не найдена');
